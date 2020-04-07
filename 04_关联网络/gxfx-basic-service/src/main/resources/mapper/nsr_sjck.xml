@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.com.servyou.dao.sjck.NsrRepository">
+    <resultMap id="nsrMap" type="cn.com.servyou.gxfx.basic.model.Nsr">
+        <result column="nsrdzdah" jdbcType="VARCHAR" property="nsrdzdah"/>
+        <result column="nsrmc" jdbcType="VARCHAR" property="name"/>
+        <result column="nsrsbh" jdbcType="VARCHAR" property="sbh"/>
+        <result column="nsrzt_id" jdbcType="VARCHAR" property="nsrztdm"/>
+        <result column="nsrztmc" jdbcType="VARCHAR" property="nsrztmc"/>
+        <result column="hy_dm" jdbcType="VARCHAR" property="hydm"/>
+        <result column="hymc" jdbcType="VARCHAR" property="hymc"/>
+        <result column="djzclx_dm" jdbcType="VARCHAR" property="djzclxdm"/>
+        <result column="djzclxmc" jdbcType="VARCHAR" property="djzclxmc"/>
+        <result column="zzsnsrlxmc" jdbcType="VARCHAR" property="zzsnsrlxmc"/>
+        <result column="swjgmc" jdbcType="VARCHAR" property="swjgmc"/>
+        <result column="dsswjgmc" jdbcType="VARCHAR" property="dsswjgmc"/>
+        <result column="djrq" jdbcType="VARCHAR" property="djrq"/>
+        <result column="zczb" jdbcType="DOUBLE" property="zczb"/>
+        <result column="zcdz" jdbcType="VARCHAR" property="zcdz"/>
+        <result column="scjydz" jdbcType="VARCHAR" property="scjydz"/>
+        <result column="jyfw" jdbcType="VARCHAR" property="jyfw"/>
+        <result column="fddbrmc" jdbcType="VARCHAR" property="fddbrmc"/>
+    </resultMap>
+
+    <select id="getNsr" resultMap="nsrMap">
+        SELECT T.NSRDZDAH,
+               T.NSRMC,
+               T.NSRSBH,
+               T.NSRZT_ID,
+               T.NSRZTMC,
+               T.HY_DM,
+               T.HYMC,
+               T.DJZCLX_DM,
+               T.DJZCLXMC,
+               N.ZZSNSRLXMC,
+               T.SWJGMC,
+               T.DSSWJGMC,
+               TO_CHAR(T.SWHZDJRQ, 'YYYYMMDD') djrq,
+               T.ZCZB,
+               T.ZCDZ,
+               T.SCJYDZ,
+               T.JYFW
+        FROM WD_NSR_KZ T
+                 LEFT JOIN WD_ZZSNSRLX N ON T.ZZSNSRLX_ID = N.ZZSNSRLX_ID
+        WHERE T.NSRDZDAH = #{nsrdzdah, jdbcType=VARCHAR}
+    </select>
+
+    <select id="getNsrBatch" resultMap="nsrMap">
+        SELECT
+        T.NSRDZDAH,
+        T.NSRMC,
+        T.NSRSBH,
+        T.NSRZT_ID,
+        T.NSRZTMC,
+        TO_CHAR(T.SWHZDJRQ, 'YYYYMMDD') djrq,
+        T.HY_DM,
+        T.HYMC,
+        T.DJZCLX_DM,
+        T.DJZCLXMC,
+        T.DSSWJGMC
+        FROM WD_NSR T
+        WHERE T.NSRDZDAH IN
+        <foreach item="item" index="index" collection="nsrdzdahs"
+                 open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+
+    <select id="search" resultMap="nsrMap">
+        SELECT N.NSRDZDAH, N.NSRMC, N.NSRSBH, N.SHXYDM, N.FDDBRMC, N.ZCZB, N.DJZCLXMC, N.NSRZT_ID, N.NSRZTMC, N.SWJGMC
+        FROM WD_NSR_KZ N
+        WHERE 1 = 1
+        <if test="search.name != null">
+            AND (N.NSRMC like '%' || #{search.name,jdbcType=VARCHAR} || '%'
+            or N.NSRSBH like '%' || #{search.name,jdbcType=VARCHAR} || '%'
+            or N.SHXYDM like '%' || #{search.name,jdbcType=VARCHAR} || '%')
+        </if>
+        <if test="search.hyId != null">
+            AND N.HY_ID like #{search.hyId}
+        </if>
+        <if test="search.nsrztdm != null">
+            AND N.NSRZT_DM = #{search.nsrztdm}
+        </if>
+        <if test="search.zczbBegin != null">
+            AND N.ZCZB <![CDATA[ >= ]]> #{search.zczbBegin}
+        </if>
+        <if test="search.zczbEnd != null">
+            AND N.ZCZB <![CDATA[ <= ]]> #{search.zczbEnd}
+        </if>
+        <if test="search.swjgdm != null">
+            AND N.SWJG_DM = #{search.swjgdm}
+        </if>
+        <if test="search.djzclxId != null">
+            AND N.DJZCLX_ID = #{search.djzclxId}
+        </if>
+    </select>
+</mapper>

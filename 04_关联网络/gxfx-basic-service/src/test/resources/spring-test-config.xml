@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+
+
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context.xsd
+       http://www.springframework.org/schema/util
+       http://www.springframework.org/schema/util/spring-util.xsd">
+
+    <import resource="classpath:spring-datasource.xml"/>
+
+    <!-- 运行测试时打开注释 -->
+    <context:component-scan base-package="cn.com.servyou">
+    </context:component-scan>
+    <context:component-scan base-package="cn.com.jdls"/>
+    <util:properties id="config" location="file:${user.dir}/../gxfx-dhfx-daieweb-config/daup_config.properties"/>
+    <context:property-placeholder location="file:${user.dir}/../gxfx-dhfx-daieweb-config/daup_config.properties"
+                                  ignore-unresolvable="true"
+                                  file-encoding="UTF-8"/>
+
+    <!--<bean id="mockServletContext" class="org.springframework.mock.web.MockServletContext">-->
+    <!--<property name="contextPath" value=""/>-->
+    <!--</bean>-->
+</beans>

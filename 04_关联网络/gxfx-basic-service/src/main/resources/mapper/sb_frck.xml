@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.com.servyou.dao.frck.SbRepository">
+
+    <resultMap id="sbZzs" type="cn.com.servyou.gxfx.basic.model.SbZzs">
+        <result column="nsrdzdah" jdbcType="VARCHAR" property="nsrdzdah"/>
+        <result column="nsrmc" jdbcType="VARCHAR" property="nsrmc"/>
+        <result column="ssyf" jdbcType="VARCHAR" property="ssyf"/>
+        <result column="qbxssr" jdbcType="DOUBLE" property="qbxssr"/>
+        <result column="qbxxse" jdbcType="DOUBLE" property="qbxxse"/>
+        <result column="qbjxse" jdbcType="DOUBLE" property="qbjxse"/>
+        <result column="ynsejze" jdbcType="DOUBLE" property="ynsejze"/>
+        <result column="qbynse" jdbcType="DOUBLE" property="qbynse"/>
+        <result column="wkfpje" jdbcType="DOUBLE" property="wkfpje"/>
+    </resultMap>
+
+    <resultMap id="sbQysds" type="cn.com.servyou.gxfx.basic.model.SbQysds">
+        <result column="nsrdzdah" jdbcType="VARCHAR" property="nsrdzdah"/>
+        <result column="nsrmc" jdbcType="VARCHAR" property="nsrmc"/>
+        <result column="ssnd" jdbcType="VARCHAR" property="ssnd"/>
+        <result column="yysr" jdbcType="DOUBLE" property="yysr"/>
+        <result column="xsspsr" jdbcType="DOUBLE" property="xsspsr"/>
+        <result column="yycb" jdbcType="DOUBLE" property="yycb"/>
+        <result column="qjfy" jdbcType="DOUBLE" property="qjfy"/>
+        <result column="lrze" jdbcType="DOUBLE" property="lrze"/>
+        <result column="ynse" jdbcType="DOUBLE" property="ynse"/>
+    </resultMap>
+
+    <select id="getZzs" resultMap="sbZzs">
+        select t.nsrdzdah,
+               t.nsrmc,
+               sum(t.qbxssr)  qbxssr,
+               sum(t.qbxxse)  qbxxse,
+               sum(t.qbjxse)  qbjxse,
+               sum(t.qbynse)  qbynse,
+               sum(t.ynsejze) ynsejze,
+               sum(t.wkfp)    wkfpje
+        from XKCA_SB_ZZS_YF t
+        where t.nsrdzdah = #{nsrdzdah}
+          and t.ssyf between #{begin} and #{end}
+        group by t.nsrdzdah, t.nsrmc
+    </select>
+
+    <select id="getXfsYnse" resultType="java.lang.Double">
+        select sum(t.ynse)
+        from XKCA_SB_XFS_YF t
+        where t.nsrdzdah = #{nsrdzdah}
+          and t.ssyf between #{begin} and #{end}
+    </select>
+
+    <select id="getQysds" resultMap="sbQysds">
+        select t.nsrdzdah,
+               t.nsrmc,
+               t.ssnd,
+               t.yysr,
+               t.xsspsr,
+               t.yycb,
+               t.qjfy,
+               t.lrze,
+               t.ynse
+        from XKCA_SB_QYSDS_ND t
+        where t.nsrdzdah = #{nsrdzdah}
+          and t.ssnd = #{year}
+    </select>
+
+    <select id="getRkse" resultType="java.lang.Double">
+        select sum(t.rksr)
+        from XKCA_SB_RKSR t
+        where t.nsrdzdah = #{nsrdzdah}
+          and t.zsxm_id = #{zsxmId}
+          and t.sqyf between #{begin} and #{end}
+    </select>
+</mapper>

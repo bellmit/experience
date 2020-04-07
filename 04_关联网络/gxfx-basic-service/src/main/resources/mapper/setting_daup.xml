@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.com.servyou.dao.daup.SettingRepository">
+
+    <resultMap id="settingMap" type="cn.com.servyou.gxfx.basic.model.Setting">
+        <result column="USER_ID" jdbcType="VARCHAR" property="userId"/>
+        <result column="ITEM_CODE" jdbcType="VARCHAR" property="itemCode"/>
+        <result column="ITEM_NAME" jdbcType="VARCHAR" property="itemName"/>
+        <result column="ITEM_VALUE" jdbcType="VARCHAR" property="itemValue"/>
+    </resultMap>
+
+    <select id="getSettingsByUserId" resultMap="settingMap">
+        SELECT T.USER_ID, T.ITEM_CODE, T.ITEM_NAME, T.ITEM_VALUE
+        FROM XKCA_USER_DEFAULT_SETTING T
+        WHERE T.USER_ID = #{userId}
+    </select>
+
+    <delete id="deleteSettingsByUserId">
+        DELETE XKCA_USER_DEFAULT_SETTING
+        WHERE USER_ID = #{userId,jdbcType=VARCHAR}
+    </delete>
+
+    <insert id="addUserDefalutSetting">
+        INSERT INTO XKCA_USER_DEFAULT_SETTING (USER_ID, ITEM_CODE, ITEM_NAME, ITEM_VALUE)
+        <foreach collection="list" item="obj" index="index" separator=" UNION ALL ">
+            SELECT #{obj.userId}, #{obj.itemCode}, #{obj.itemName}, #{obj.itemValue} FROM DUAL
+        </foreach>
+    </insert>
+</mapper>

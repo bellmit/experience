@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.com.servyou.dao.daup.SignRepository">
+    <resultMap id="signMap" type="cn.com.servyou.gxfx.basic.model.Sign">
+        <result column="SIGN_ID" jdbcType="VARCHAR" property="signId"/>
+        <result column="SIGN_NAME" jdbcType="VARCHAR" property="signName"/>
+    </resultMap>
+    <resultMap id="companySignMap" type="cn.com.servyou.gxfx.basic.model.CompanySign">
+        <result column="COMPANY_CODE" jdbcType="VARCHAR" property="companyCode"/>
+        <result column="SIGN_ID" jdbcType="VARCHAR" property="signId"/>
+        <result column="SIGN_NAME" jdbcType="VARCHAR" property="signName"/>
+        <result column="COMMENT" jdbcType="VARCHAR" property="comment"/>
+        <result column="CREATE_USER_ID" jdbcType="VARCHAR" property="createUserId"/>
+        <result column="CREATE_USER_NAME" jdbcType="VARCHAR" property="createUserName"/>
+        <result column="CREATE_TIME" jdbcType="VARCHAR" property="createTime"/>
+    </resultMap>
+
+    <select id="getAllPreSetSign" resultMap="signMap">
+        SELECT T.SIGN_ID, T.SIGN_NAME
+        FROM XKCA_PRESET_COMPANY_SIGN T
+        WHERE T.IS_VALID = '1'
+    </select>
+
+    <select id="getCompanySign" resultMap="companySignMap">
+        SELECT T.COMPANY_CODE, T.SIGN_ID, T.SIGN_NAME, T."COMMENT", T.CREATE_USER_ID, T.CREATE_USER_NAME, T.CREATE_TIME
+        FROM XKCA_COMPANY_SIGN T
+        WHERE T.COMPANY_CODE = #{companyCode}
+    </select>
+
+    <insert id="addCompanySign">
+        INSERT INTO XKCA_COMPANY_SIGN (COMPANY_CODE,
+                                       SIGN_ID,
+                                       SIGN_NAME,
+                                       "COMMENT",
+                                       CREATE_USER_ID,
+                                       CREATE_USER_NAME,
+                                       CREATE_TIME,
+                                       MODIFY_TIME,
+                                       IS_VALID)
+        VALUES (#{cs.companyCode},
+                #{cs.signId},
+                #{cs.signName},
+                #{cs.comment},
+                #{cs.createUserId},
+                #{cs.createUserName},
+                SYSDATE,
+                SYSDATE,
+                '1')
+    </insert>
+
+    <!-- 不用软删除，一来没有必要，历史记录保存着没有意义；二来删除后再增加，需要很多额外的判断，是恢复之前的记录？还是新建一条？新建一条会有主键冲突的问题 -->
+    <delete id="deleteCompanySign">
+        delete XKCA_COMPANY_SIGN T
+        where T.COMPANY_CODE = #{companyCode}
+          AND T.SIGN_ID = #{signId}
+    </delete>
+
+
+    <select id="findBySignNameCount" resultType="java.lang.Integer">
+        SELECT COUNT(*)
+        FROM XKCA_COMPANY_SIGN T
+        WHERE T.COMPANY_CODE = #{companyCode}
+          AND T.SIGN_NAME = #{signName}
+    </select>
+
+    <select id="getCompanySigns" resultMap="companySignMap">
+        SELECT T.COMPANY_CODE,
+        T.SIGN_NAME
+        FROM XKCA_COMPANY_SIGN T
+        WHERE T.COMPANY_CODE IN
+        <foreach item="item" index="index" collection="nsrdzdahSet"
+                 open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+</mapper>

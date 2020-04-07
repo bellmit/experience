@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd">
+
+    <bean id="abstractXADataSource" class="com.atomikos.jdbc.AtomikosDataSourceBean"
+          destroy-method="close">
+        <property name="poolSize" value="${connection.poolSize}"/>
+        <property name="minPoolSize" value="${connection.minPoolSize}"/>
+        <property name="maxPoolSize" value="${connection.maxPoolSize}"/>
+        <!--获取连接失败重新获等待最大时间，在这个时间内如果有可用连接，将返回-->
+        <property name="borrowConnectionTimeout" value="60"/>
+        <!--最大获取数据时间，如果不设置这个值，Atomikos使用默认的5分钟，那么在处理大批量数据读取的时候，一旦超过5分钟，就会抛出类似 Resultset is close 的错误.-->
+        <property name="reapTimeout" value="60"/>
+        <!--最大闲置时间，超过最小连接池连接的连接将将关闭-->
+        <property name="maxIdleTime" value="60"/>
+        <!--连接回收时间-->
+        <property name="maintenanceInterval" value="60"/>
+        <!--java数据库连接池，最大可等待获取datasouce的时间-->
+        <property name="loginTimeout" value="${connection.loginTimeout}"/>
+        <property name="testQuery">
+            <value>select 1 from dual</value>
+        </property>
+    </bean>
+
+    <bean id="daupdb" parent="abstractXADataSource" class="com.atomikos.jdbc.nonxa.AtomikosNonXADataSourceBean">
+        <!-- value只要两个数据源不同就行，随便取名 -->
+        <property name="uniqueResourceName" value="daupdb"/>
+        <property name="driverClassName" value="${daup.dataSource.driver}"/>
+        <property name="url" value="${daup.url}"/>
+        <property name="user" value="${daup.user}"/>
+        <property name="password" value="${daup.password}"/>
+    </bean>
+
+    <bean id="fpsjckdb" parent="abstractXADataSource" class="com.atomikos.jdbc.nonxa.AtomikosNonXADataSourceBean">
+        <property name="uniqueResourceName" value="fpsjckdb"/>
+        <property name="driverClassName" value="${sjck.dataSource.driver}"/>
+        <property name="url" value="${sjck.url}"/>
+        <property name="user" value="${sjck.user}"/>
+        <property name="password" value="${sjck.password}"/>
+    </bean>
+
+    <bean id="frsjckdb" parent="abstractXADataSource" class="com.atomikos.jdbc.nonxa.AtomikosNonXADataSourceBean">
+        <property name="uniqueResourceName" value="frsjckdb"/>
+        <property name="driverClassName" value="${frck.dataSource.driver}"/>
+        <property name="url" value="${frck.url}"/>
+        <property name="user" value="${frck.user}"/>
+        <property name="password" value="${frck.password}"/>
+        <property name="loginTimeout" value="${frck.timeout}"/>
+    </bean>
+
+    <bean id="zxcpdb" parent="abstractXADataSource" class="com.atomikos.jdbc.nonxa.AtomikosNonXADataSourceBean">
+        <property name="uniqueResourceName" value="zxcpdb"/>
+        <property name="driverClassName" value="${dhsz.dataSource.driver}"/>
+        <property name="url" value="${dhsz.url}"/>
+        <property name="user" value="${dhsz.user}"/>
+        <property name="password" value="${dhsz.password}"/>
+    </bean>
+
+    <!-- spring和MyBatis完美整合，不需要mybatis的配置映射文件 -->
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="daupdb"/>
+        <!-- 自动扫描mapping.xml文件 -->
+        <property name="mapperLocations" value="classpath*:mapper/*_daup.xml"></property>
+        <property name="configLocation" value="classpath:mybatis-config.xml"></property>
+    </bean>
+
+    <!-- DAO接口所在包名，Spring会自动查找其下的类 ,自动扫描了所有的XxxxMapper.xml对应的mapper接口文件,只要Mapper接口类和Mapper映射文件对应起来就可以了-->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="basePackage" value="cn.com.servyou.dao.daup"/>
+        <property name="annotationClass" value="org.springframework.stereotype.Repository"/>
+        <property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"></property>
+    </bean>
+
+    <!-- spring和MyBatis完美整合，不需要mybatis的配置映射文件 -->
+    <bean id="sqlSessionFactoryFpSjck" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="fpsjckdb"/>
+        <!-- 自动扫描mapping.xml文件 -->
+        <property name="mapperLocations" value="classpath*:mapper/*_sjck.xml"></property>
+        <property name="configLocation" value="classpath:mybatis-config.xml"></property>
+    </bean>
+
+    <!-- DAO接口所在包名，Spring会自动查找其下的类 ,自动扫描了所有的XxxxMapper.xml对应的mapper接口文件,只要Mapper接口类和Mapper映射文件对应起来就可以了-->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="basePackage" value="cn.com.servyou.dao.sjck"/>
+        <property name="annotationClass" value="org.springframework.stereotype.Repository"/>
+        <property name="sqlSessionFactoryBeanName" value="sqlSessionFactoryFpSjck"></property>
+    </bean>
+
+    <!-- spring和MyBatis完美整合，不需要mybatis的配置映射文件 -->
+    <bean id="sqlSessionFactoryFrck" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="frsjckdb"/>
+        <!-- 自动扫描mapping.xml文件 -->
+        <property name="mapperLocations" value="classpath*:mapper/*_frck.xml"></property>
+        <property name="configLocation" value="classpath:mybatis-config.xml"></property>
+    </bean>
+
+    <!-- DAO接口所在包名，Spring会自动查找其下的类 ,自动扫描了所有的XxxxMapper.xml对应的mapper接口文件,只要Mapper接口类和Mapper映射文件对应起来就可以了-->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="basePackage" value="cn.com.servyou.dao.frck"/>
+        <property name="annotationClass" value="org.springframework.stereotype.Repository"/>
+        <property name="sqlSessionFactoryBeanName" value="sqlSessionFactoryFrck"></property>
+    </bean>
+
+
+    <!-- spring和MyBatis完美整合，不需要mybatis的配置映射文件 -->
+    <bean id="sqlSessionFactoryDhsz" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="zxcpdb"/>
+        <!-- 自动扫描mapping.xml文件 -->
+        <property name="mapperLocations" value="classpath*:mapper/*_dhsz.xml"></property>
+        <property name="configLocation" value="classpath:mybatis-config.xml"></property>
+    </bean>
+
+
+    <!-- DAO接口所在包名，Spring会自动查找其下的类 ,自动扫描了所有的XxxxMapper.xml对应的mapper接口文件,只要Mapper接口类和Mapper映射文件对应起来就可以了-->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="basePackage" value="cn.com.servyou.dao.dhsz"/>
+        <property name="annotationClass" value="org.springframework.stereotype.Repository"/>
+        <property name="sqlSessionFactoryBeanName" value="sqlSessionFactoryDhsz"></property>
+    </bean>
+
+    <bean id="atomikosTransactionManager" class="com.atomikos.icatch.jta.UserTransactionManager"
+          init-method="init" destroy-method="close">
+        <property name="forceShutdown">
+            <value>true</value>
+        </property>
+    </bean>
+
+    <bean id="atomikosUserTransaction" class="com.atomikos.icatch.jta.UserTransactionImp">
+        <property name="transactionTimeout" value="6000"/>
+    </bean>
+
+    <bean id="springTransactionManager"
+          class="org.springframework.transaction.jta.JtaTransactionManager">
+        <property name="transactionManager" ref="atomikosTransactionManager"/>
+        <property name="userTransaction" ref="atomikosUserTransaction"/>
+        <property name="allowCustomIsolationLevels" value="true"/>
+    </bean>
+
+
+    <!--======= 事务配置 End =================== -->
+    <!-- 配置基于注解的声明式事务 -->
+    <!-- enables scanning for @Transactional annotations -->
+    <tx:annotation-driven transaction-manager="springTransactionManager"/>
+
+</beans>

@@ -1,0 +1,298 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.com.servyou.dao.sjck.FphwRepository">
+    <resultMap id="hwjeTopMap" type="cn.com.servyou.gxfx.basic.model.HwJe">
+        <result column="BZSPMC" jdbcType="VARCHAR" property="spmc"/>
+        <result column="JE" jdbcType="INTEGER" property="je"/>
+    </resultMap>
+    <resultMap id="fphwJyjeMap" type="cn.com.servyou.gxfx.basic.model.FphwJyje">
+        <result column="XFNSRDZDAH" jdbcType="VARCHAR" property="xfnsrdzdah"/>
+        <result column="XFNSRMC" jdbcType="VARCHAR" property="xfnsrmc"/>
+        <result column="GFNSRDZDAH" jdbcType="VARCHAR" property="gfnsrdzdah"/>
+        <result column="GFNSRMC" jdbcType="VARCHAR" property="gfnsrmc"/>
+        <result column="BZSPMC" jdbcType="VARCHAR" property="spmc"/>
+        <result column="JE" jdbcType="INTEGER" property="je"/>
+    </resultMap>
+
+
+    <select id="qyJxTopZp" resultMap="hwjeTopMap">
+        select T.BZSPMC, sum(T.JE) JE
+        from FPKJ_ZZSZYFP_GXFYDXX_SP T
+        where T.GFNSRDZDAH = #{nsrdzdah, jdbcType=VARCHAR}
+          and T.KPYF_DM between #{begin, jdbcType=VARCHAR} and #{end, jdbcType=VARCHAR}
+          and T.DZDZFPZT_ID in ('0', '3')
+        group by T.BZSPMC
+        order by JE desc
+    </select>
+    <select id="qyJxTopPp" resultMap="hwjeTopMap">
+        select T.BZSPMC, sum(T.JE) JE
+        from FPKJ_ZZSPTFP_GXFYDXX_SP T
+        where T.GFNSRDZDAH = #{nsrdzdah, jdbcType=VARCHAR}
+          and T.KPYF_DM between #{begin, jdbcType=VARCHAR} and #{end, jdbcType=VARCHAR}
+          and T.DZDZFPZT_ID in ('0', '3')
+        group by T.BZSPMC
+        order by JE desc
+    </select>
+    <select id="qyJxTopAll" resultMap="hwjeTopMap">
+        select T.BZSPMC, sum(T.JE) JE
+        from (select Z.BZSPMC, Z.JE
+              from FPKJ_ZZSZYFP_GXFYDXX_SP Z
+              where Z.GFNSRDZDAH = #{nsrdzdah, jdbcType=VARCHAR}
+                and Z.KPYF_DM between #{begin, jdbcType=VARCHAR} and #{end, jdbcType=VARCHAR}
+                and Z.DZDZFPZT_ID in ('0', '3')
+              union all
+              select P.BZSPMC, P.JE
+              from FPKJ_ZZSPTFP_GXFYDXX_SP P
+              where P.GFNSRDZDAH = #{nsrdzdah, jdbcType=VARCHAR}
+                and P.KPYF_DM between #{begin, jdbcType=VARCHAR} and #{end, jdbcType=VARCHAR}
+                and P.DZDZFPZT_ID in ('0', '3')) T
+        group by T.BZSPMC
+        order by JE desc
+    </select>
+
+
+    <select id="qyXxTopZp" resultMap="hwjeTopMap">
+        select T.BZSPMC, sum(T.JE) JE
+        from FPKJ_ZZSZYFP_GXFYDXX_SP T
+        where T.XFNSRDZDAH = #{nsrdzdah, jdbcType=VARCHAR}
+          and T.KPYF_DM between #{begin, jdbcType=VARCHAR} and #{end, jdbcType=VARCHAR}
+          and T.DZDZFPZT_ID in ('0', '3')
+        group by T.BZSPMC
+        order by JE desc
+    </select>
+    <select id="qyXxTopPp" resultMap="hwjeTopMap">
+        select T.BZSPMC, sum(T.JE) JE
+        from FPKJ_ZZSPTFP_GXFYDXX_SP T
+        where T.XFNSRDZDAH = #{nsrdzdah, jdbcType=VARCHAR}
+          and T.KPYF_DM between #{begin, jdbcType=VARCHAR} and #{end, jdbcType=VARCHAR}
+          and T.DZDZFPZT_ID in ('0', '3')
+        group by T.BZSPMC
+        order by JE desc
+    </select>
+    <select id="qyXxTopAll" resultMap="hwjeTopMap">
+        select T.BZSPMC, sum(T.JE) JE
+        from (select Z.BZSPMC, Z.JE
+              from FPKJ_ZZSZYFP_GXFYDXX_SP Z
+              where Z.XFNSRDZDAH = #{nsrdzdah, jdbcType=VARCHAR}
+                and Z.KPYF_DM between #{begin, jdbcType=VARCHAR} and #{end, jdbcType=VARCHAR}
+                and Z.DZDZFPZT_ID in ('0', '3')
+              union all
+              select P.BZSPMC, P.JE
+              from FPKJ_ZZSPTFP_GXFYDXX_SP P
+              where P.XFNSRDZDAH = #{nsrdzdah, jdbcType=VARCHAR}
+                and P.KPYF_DM between #{begin, jdbcType=VARCHAR} and #{end, jdbcType=VARCHAR}
+                and P.DZDZFPZT_ID in ('0', '3')) T
+        group by T.BZSPMC
+        order by JE desc
+    </select>
+
+
+    <select id="jyTopZp" resultMap="hwjeTopMap">
+        select T.BZSPMC, sum(T.JE) JE
+        from FPKJ_ZZSZYFP_GXFYDXX_SP T
+        where T.XFNSRDZDAH = #{xf, jdbcType=VARCHAR}
+          and T.GFNSRDZDAH = #{gf, jdbcType=VARCHAR}
+          and T.KPYF_DM between #{begin, jdbcType=VARCHAR} and #{end, jdbcType=VARCHAR}
+          and T.DZDZFPZT_ID in ('0', '3')
+        group by T.BZSPMC
+        order by JE desc
+    </select>
+    <select id="jyTopPp" resultMap="hwjeTopMap">
+        select T.BZSPMC, sum(T.JE) JE
+        from FPKJ_ZZSPTFP_GXFYDXX_SP T
+        where T.XFNSRDZDAH = #{xf, jdbcType=VARCHAR}
+          and T.GFNSRDZDAH = #{gf, jdbcType=VARCHAR}
+          and T.KPYF_DM between #{begin, jdbcType=VARCHAR} and #{end, jdbcType=VARCHAR}
+          and T.DZDZFPZT_ID in ('0', '3')
+        group by T.BZSPMC
+        order by JE desc
+    </select>
+    <select id="jyTopAll" resultMap="hwjeTopMap">
+        select T.BZSPMC, sum(T.JE) JE
+        from (select Z.BZSPMC, Z.JE
+              from FPKJ_ZZSZYFP_GXFYDXX_SP Z
+              where Z.XFNSRDZDAH = #{xf, jdbcType=VARCHAR}
+                and Z.GFNSRDZDAH = #{gf, jdbcType=VARCHAR}
+                and Z.KPYF_DM between #{begin, jdbcType=VARCHAR} and #{end, jdbcType=VARCHAR}
+                and Z.DZDZFPZT_ID in ('0', '3')
+
+              union all
+
+              select P.BZSPMC, P.JE
+              from FPKJ_ZZSPTFP_GXFYDXX_SP P
+              where P.XFNSRDZDAH = #{xf, jdbcType=VARCHAR}
+                and P.GFNSRDZDAH = #{gf, jdbcType=VARCHAR}
+                and P.KPYF_DM between #{begin, jdbcType=VARCHAR} and #{end, jdbcType=VARCHAR}
+                and P.DZDZFPZT_ID in ('0', '3')) T
+        group by T.BZSPMC
+        order by JE desc
+    </select>
+
+
+    <select id="gjhwZp" resultMap="hwjeTopMap">
+        select T.BZSPMC, sum(T.JE) JE
+        from FPKJ_ZZSZYFP_GXFYDXX_SP T
+        where T.GFNSRDZDAH = #{nsrdzdah, jdbcType=VARCHAR}
+          and T.KPYF_DM between #{begin, jdbcType=VARCHAR} and #{end, jdbcType=VARCHAR}
+          and T.DZDZFPZT_ID in ('0', '3')
+        group by T.BZSPMC
+    </select>
+    <select id="gjhwPp" resultMap="hwjeTopMap">
+        select T.BZSPMC, sum(T.JE) JE
+        from FPKJ_ZZSPTFP_GXFYDXX_SP T
+        where T.GFNSRDZDAH = #{nsrdzdah, jdbcType=VARCHAR}
+          and T.KPYF_DM between #{begin, jdbcType=VARCHAR} and #{end, jdbcType=VARCHAR}
+          and T.DZDZFPZT_ID in ('0', '3')
+        group by T.BZSPMC
+    </select>
+    <select id="gjhwAll" resultMap="hwjeTopMap">
+        select T.BZSPMC, sum(T.JE) JE
+        from (select Z.BZSPMC, Z.JE
+              from FPKJ_ZZSZYFP_GXFYDXX_SP Z
+              where Z.GFNSRDZDAH = #{nsrdzdah, jdbcType=VARCHAR}
+                and Z.KPYF_DM between #{begin, jdbcType=VARCHAR} and #{end, jdbcType=VARCHAR}
+                and Z.DZDZFPZT_ID in ('0', '3')
+
+              union all
+
+              select P.BZSPMC, P.JE
+              from FPKJ_ZZSPTFP_GXFYDXX_SP P
+              where P.GFNSRDZDAH = #{nsrdzdah, jdbcType=VARCHAR}
+                and P.KPYF_DM between #{begin, jdbcType=VARCHAR} and #{end, jdbcType=VARCHAR}
+                and P.DZDZFPZT_ID in ('0', '3')) T
+        group by T.BZSPMC
+    </select>
+
+
+    <select id="xshwZp" resultMap="hwjeTopMap">
+        select T.BZSPMC, sum(T.JE) JE
+        from FPKJ_ZZSZYFP_GXFYDXX_SP T
+        where T.XFNSRDZDAH = #{nsrdzdah, jdbcType=VARCHAR}
+          and T.KPYF_DM between #{begin, jdbcType=VARCHAR} and #{end, jdbcType=VARCHAR}
+          and T.DZDZFPZT_ID in ('0', '3')
+        group by T.BZSPMC
+    </select>
+    <select id="xshwPp" resultMap="hwjeTopMap">
+        select T.BZSPMC, sum(T.JE) JE
+        from FPKJ_ZZSPTFP_GXFYDXX_SP T
+        where T.XFNSRDZDAH = #{nsrdzdah, jdbcType=VARCHAR}
+          and T.KPYF_DM between #{begin, jdbcType=VARCHAR} and #{end, jdbcType=VARCHAR}
+          and T.DZDZFPZT_ID in ('0', '3')
+        group by T.BZSPMC
+    </select>
+    <select id="xshwAll" resultMap="hwjeTopMap">
+        select T.BZSPMC, sum(T.JE) JE
+        from (select Z.BZSPMC, Z.JE
+              from FPKJ_ZZSZYFP_GXFYDXX_SP Z
+              where Z.XFNSRDZDAH = #{nsrdzdah, jdbcType=VARCHAR}
+                and Z.KPYF_DM between #{begin, jdbcType=VARCHAR} and #{end, jdbcType=VARCHAR}
+                and Z.DZDZFPZT_ID in ('0', '3')
+
+              union all
+
+              select P.BZSPMC, P.JE
+              from FPKJ_ZZSPTFP_GXFYDXX_SP P
+              where P.XFNSRDZDAH = #{nsrdzdah, jdbcType=VARCHAR}
+                and P.KPYF_DM between #{begin, jdbcType=VARCHAR} and #{end, jdbcType=VARCHAR}
+                and P.DZDZFPZT_ID in ('0', '3')) T
+        group by T.BZSPMC
+    </select>
+
+
+    <select id="syHwFpZp" resultMap="fphwJyjeMap">
+        select T.XFNSRDZDAH, T.XFNSRMC, T.GFNSRDZDAH, T.GFNSRMC, T.BZSPMC, sum(T.JE) JE
+        from FPKJ_ZZSZYFP_GXFYDXX_SP T
+        where T.GFNSRDZDAH = #{nsrdzdah, jdbcType=VARCHAR}
+        and T.KPYF_DM between #{begin, jdbcType=VARCHAR} and #{end, jdbcType=VARCHAR}
+        and T.BZSPMC in
+        <foreach item="item" index="index" collection="hwSet" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        and T.DZDZFPZT_ID in ('0', '3')
+        group by T.XFNSRDZDAH, T.XFNSRMC, T.GFNSRDZDAH, T.GFNSRMC, T.BZSPMC
+    </select>
+    <select id="syHwFpPp" resultMap="fphwJyjeMap">
+        select T.XFNSRDZDAH, T.XFNSRMC, T.GFNSRDZDAH, T.GFNSRMC, T.BZSPMC, sum(T.JE) JE
+        from FPKJ_ZZSPTFP_GXFYDXX_SP T
+        where T.GFNSRDZDAH = #{nsrdzdah, jdbcType=VARCHAR}
+        and T.KPYF_DM between #{begin, jdbcType=VARCHAR} and #{end, jdbcType=VARCHAR}
+        and T.BZSPMC in
+        <foreach item="item" index="index" collection="hwSet" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        and T.DZDZFPZT_ID in ('0', '3')
+        group by T.XFNSRDZDAH, T.XFNSRMC, T.GFNSRDZDAH, T.GFNSRMC, T.BZSPMC
+    </select>
+    <select id="syHwFpAll" resultMap="fphwJyjeMap">
+        select T.XFNSRDZDAH, T.XFNSRMC, T.GFNSRDZDAH, T.GFNSRMC, T.BZSPMC, sum(T.JE) JE
+        from (select Z.XFNSRDZDAH, Z.XFNSRMC, Z.GFNSRDZDAH, Z.GFNSRMC, Z.BZSPMC, Z.JE
+        from FPKJ_ZZSZYFP_GXFYDXX_SP Z
+        where Z.GFNSRDZDAH = #{nsrdzdah, jdbcType=VARCHAR}
+        and Z.KPYF_DM between #{begin, jdbcType=VARCHAR} and #{end, jdbcType=VARCHAR}
+        and Z.BZSPMC in
+        <foreach item="item" index="index" collection="hwSet" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        and Z.DZDZFPZT_ID in ('0', '3')
+        union all
+        select P.XFNSRDZDAH, P.XFNSRMC, P.GFNSRDZDAH, P.GFNSRMC, P.BZSPMC, P.JE
+        from FPKJ_ZZSPTFP_GXFYDXX_SP P
+        where P.GFNSRDZDAH = #{nsrdzdah, jdbcType=VARCHAR}
+        and P.KPYF_DM between #{begin, jdbcType=VARCHAR} and #{end, jdbcType=VARCHAR}
+        and P.BZSPMC in
+        <foreach item="item" index="index" collection="hwSet" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        and P.DZDZFPZT_ID in ('0', '3')) T
+        group by T.XFNSRDZDAH, T.XFNSRMC, T.GFNSRDZDAH, T.GFNSRMC, T.BZSPMC
+    </select>
+
+
+    <select id="xyHwFpZp" resultMap="fphwJyjeMap">
+        select T.XFNSRDZDAH, T.XFNSRMC, T.GFNSRDZDAH, T.GFNSRMC, T.BZSPMC, sum(T.JE) JE
+        from FPKJ_ZZSZYFP_GXFYDXX_SP T
+        where T.XFNSRDZDAH = #{nsrdzdah, jdbcType=VARCHAR}
+        and T.KPYF_DM between #{begin, jdbcType=VARCHAR} and #{end, jdbcType=VARCHAR}
+        and T.BZSPMC in
+        <foreach item="item" index="index" collection="hwSet" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        and T.DZDZFPZT_ID in ('0', '3')
+        group by T.XFNSRDZDAH, T.XFNSRMC, T.GFNSRDZDAH, T.GFNSRMC, T.BZSPMC
+    </select>
+    <select id="xyHwFpPp" resultMap="fphwJyjeMap">
+        select T.XFNSRDZDAH, T.XFNSRMC, T.GFNSRDZDAH, T.GFNSRMC, T.BZSPMC, sum(T.JE) JE
+        from FPKJ_ZZSPTFP_GXFYDXX_SP T
+        where T.XFNSRDZDAH = #{nsrdzdah, jdbcType=VARCHAR}
+        and T.KPYF_DM between #{begin, jdbcType=VARCHAR} and #{end, jdbcType=VARCHAR}
+        and T.BZSPMC in
+        <foreach item="item" index="index" collection="hwSet" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        and T.DZDZFPZT_ID in ('0', '3')
+        group by T.XFNSRDZDAH, T.XFNSRMC, T.GFNSRDZDAH, T.GFNSRMC, T.BZSPMC
+    </select>
+    <select id="xyHwFpAll" resultMap="fphwJyjeMap">
+        select T.XFNSRDZDAH, T.XFNSRMC, T.GFNSRDZDAH, T.GFNSRMC, T.BZSPMC, sum(T.JE) JE
+        from (select Z.XFNSRDZDAH, Z.XFNSRMC, Z.GFNSRDZDAH, Z.GFNSRMC, Z.BZSPMC, Z.JE
+        from FPKJ_ZZSZYFP_GXFYDXX_SP Z
+        where Z.XFNSRDZDAH = #{nsrdzdah, jdbcType=VARCHAR}
+        and Z.KPYF_DM between #{begin, jdbcType=VARCHAR} and #{end, jdbcType=VARCHAR}
+        and Z.BZSPMC in
+        <foreach item="item" index="index" collection="hwSet" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        and Z.DZDZFPZT_ID in ('0', '3')
+        union all
+        select P.XFNSRDZDAH, P.XFNSRMC, P.GFNSRDZDAH, P.GFNSRMC, P.BZSPMC, P.JE
+        from FPKJ_ZZSPTFP_GXFYDXX_SP P
+        where P.XFNSRDZDAH = #{nsrdzdah, jdbcType=VARCHAR}
+        and P.KPYF_DM between #{begin, jdbcType=VARCHAR} and #{end, jdbcType=VARCHAR}
+        and P.BZSPMC in
+        <foreach item="item" index="index" collection="hwSet" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        and P.DZDZFPZT_ID in ('0', '3')) T
+        group by T.XFNSRDZDAH, T.XFNSRMC, T.GFNSRDZDAH, T.GFNSRMC, T.BZSPMC
+    </select>
+</mapper>
