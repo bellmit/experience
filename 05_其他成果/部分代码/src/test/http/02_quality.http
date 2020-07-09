@@ -1,0 +1,86 @@
+@hostname = localhost
+@port = 8000
+@host = {{hostname}}:{{port}}
+@baseUrl = http://{{host}}/data/quality
+@contentTypeJson = Content-Type: application/json
+@httpVersion = HTTP/1.1
+
+@qualityId=testId
+
+# 0. 检查测试的质量码是否存在（根据ID查询质量码）
+GET {{baseUrl}}/findById?qualityId={{qualityId}} {{httpVersion}}
+
+
+# 1. 增加一个质量码
+### 1.1 增加
+POST {{baseUrl}}/save
+{{contentTypeJson}}
+
+{
+  "code": 192,
+  "id": "{{qualityId}}",
+  "name": "Good",
+  "remark": "Good"
+}
+
+### 1.2 验证（根据ID查询质量码）
+GET {{baseUrl}}/findById?qualityId={{qualityId}} {{httpVersion}}
+
+
+# 2. 修改质量码
+### 2.1 修改
+POST {{baseUrl}}/save
+{{contentTypeJson}}
+
+{
+  "code": 193,
+  "id": "{{qualityId}}",
+  "name": "BAD",
+  "remark": "BAD"
+}
+
+### 2.2 验证（根据ID查询质量码）
+GET {{baseUrl}}/findById?qualityId={{qualityId}} {{httpVersion}}
+
+
+
+### 3. 查询质量码列表
+POST {{baseUrl}}/list {{httpVersion}}
+{{contentTypeJson}}
+
+{
+  "columns": [
+    "id", "name", "code", "remark"
+  ],
+  "orderByList": [
+    {
+      "column": "id",
+      "order": "ASC"
+    }
+  ],
+  "pageNo": 1,
+  "pageSize": 10,
+  "searchColumns": [
+    "name"
+  ],
+  "searchText": "BAD",
+  "whereCondition": [
+    {
+      "column": "id",
+      "operator": "EQ",
+      "values": [
+        "{{qualityId}}"
+      ]
+    }
+  ]
+}
+
+# 4. 删除质量码
+
+### 4.1 删除
+GET {{baseUrl}}/delete?qualityId={{qualityId}}
+
+### 4.2 验证（根据ID查询质量码）
+GET {{baseUrl}}/findById?qualityId={{qualityId}} {{httpVersion}}
+
+

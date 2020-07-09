@@ -1,0 +1,194 @@
+@hostname = localhost
+@port = 8000
+@host = {{hostname}}:{{port}}
+@dataBaseUrl = http://{{host}}/data
+@baseUrl = http://{{host}}/data/expression
+@contentTypeJson = Content-Type: application/json
+@httpVersion = HTTP/1.1
+
+@parameterId = testParameterId
+@entityId = testEntityId
+@pointId = {{entityId}}__{{parameterId}}__INSTANT
+
+@firstTime = 2000-01-01 00:00:00
+@secondTime = 2010-01-01 00:00:00
+@thirdTime = 2020-01-01 00:00:00
+
+@firstSampleTime = 20000101000000
+@secondSampleTime = 20100101000000
+@thirdSampleTime = 20200101000000
+
+# 0. 预备工作
+
+# 0.1 增加参数
+
+### 0.1.1 验证参数
+GET {{dataBaseUrl}}/parameter/findById?parameterId={{parameterId}} {{httpVersion}}
+
+### 0.1.2 增加参数
+POST {{dataBaseUrl}}/parameter/save {{httpVersion}}
+{{contentTypeJson}}
+
+{
+  "dataPrecision": 2,
+  "dataType": "DOUBLE",
+  "expression": null,
+  "id": "{{parameterId}}",
+  "name": "{{parameterId}}",
+  "periods": [
+    "INSTANT"
+  ],
+  "remark": "string",
+  "type": "INSTANT",
+  "unit": "testUnit"
+}
+
+### 0.1.3 验证参数增加成功
+GET {{dataBaseUrl}}/parameter/findById?parameterId={{parameterId}} {{httpVersion}}
+
+# 0.2 增加实体
+
+### 0.2.1 验证实体ID
+GET {{dataBaseUrl}}/entity/findById?entityId={{entityId}} {{httpVersion}}
+
+
+### 0.2.2 增加实体
+POST {{dataBaseUrl}}/entity/save {{httpVersion}}
+{{contentTypeJson}}
+
+{
+  "customerId": "customerId",
+  "id": "{{entityId}}",
+  "name": "{{entityId}}",
+  "remark": "{{entityId}}"
+}
+
+### 0.2.3 验证证实体增加成功
+GET {{dataBaseUrl}}/entity/findById?entityId={{entityId}} {{httpVersion}}
+
+
+# 0.3 创建测试点
+
+### 0.3.1 验证测试点不存在
+GET {{dataBaseUrl}}/point/findById?pointId={{pointId}} {{httpVersion}}
+
+### 0.3.2 增加测试点
+POST {{dataBaseUrl}}/point/save {{httpVersion}}
+{{contentTypeJson}}
+
+{
+  "name": "test",
+  "entity": {
+    "id": "{{entityId}}"
+  },
+  "parameter": {
+    "id": "{{parameterId}}"
+  },
+  "periodType": "INSTANT",
+  "type": "RAW",
+  "dataPrecision": 2,
+  "remark": "string"
+}
+
+### 0.3.3 验证增加成功
+GET {{dataBaseUrl}}/point/findById?pointId={{pointId}} {{httpVersion}}
+
+### 0.4 验证测试点无公式
+GET {{baseUrl}}/sample/{{pointId}}/{{secondSampleTime}} {{httpVersion}}
+
+
+
+# 1. 增加
+### 1.1 增加一个公式
+POST {{baseUrl}}/write {{httpVersion}}
+{{contentTypeJson}}
+
+{
+  "pointId": "{{pointId}}",
+  "expression": "first expression",
+  "validFrom": "{{firstTime}}"
+}
+
+### 1.2 验证
+GET {{baseUrl}}/sample/{{pointId}}/{{firstSampleTime}} {{httpVersion}}
+
+# 2. 修改
+
+### 2.1 修改
+POST {{baseUrl}}/write {{httpVersion}}
+{{contentTypeJson}}
+
+{
+  "pointId": "{{pointId}}",
+  "expression": "modify expression",
+  "validFrom": "{{firstTime}}"
+}
+
+### 2.2 验证
+GET {{baseUrl}}/sample/{{pointId}}/{{firstSampleTime}} {{httpVersion}}
+
+
+# 3. 不同时间段
+
+### 3.1 增加第2个公式
+POST {{baseUrl}}/write {{httpVersion}}
+{{contentTypeJson}}
+
+{
+  "pointId": "{{pointId}}",
+  "expression": "second expression",
+  "validFrom": "{{secondTime}}"
+}
+
+### 3.2 验证
+GET {{baseUrl}}/sample/{{pointId}}/{{secondSampleTime}} {{httpVersion}}
+
+
+### 3.3 增加第3个公式
+POST {{baseUrl}}/write {{httpVersion}}
+{{contentTypeJson}}
+
+{
+  "pointId": "{{pointId}}",
+  "expression": "third expression",
+  "validFrom": "{{thirdTime}}"
+}
+
+### 3.4 验证
+GET {{baseUrl}}/sample/{{pointId}}/{{thirdSampleTime}} {{httpVersion}}
+
+
+# 9. 删除测试用的数据
+
+# 9.1 删除公式
+### 9.1.1 删除
+GET {{dataBaseUrl}}/entityData/deleteData/expression/{{entityId}}
+
+### 9.1.2 验证
+GET {{baseUrl}}/sample/{{pointId}}/{{thirdSampleTime}} {{httpVersion}}
+
+
+# 9.2 删除点
+
+### 9.2.1 删除
+GET {{dataBaseUrl}}/point/delete?pointId={{pointId}} {{httpVersion}}
+
+### 9.2.2 验证删除成功
+GET {{dataBaseUrl}}/point/findById?pointId={{pointId}} {{httpVersion}}
+
+# 9.3 删除参数
+### 9.3.1 删除
+GET {{dataBaseUrl}}/parameter/delete?parameterId={{parameterId}} {{httpVersion}}
+
+### 9.3.2 验证删除成功
+GET {{dataBaseUrl}}/parameter/findById?parameterId={{parameterId}} {{httpVersion}}
+
+# 9.4 删除实体
+
+### 9.4.1 删除
+GET {{dataBaseUrl}}/entity/delete?entityId={{entityId}} {{httpVersion}}
+
+
+### 9.4.2 验证删除成功
+GET {{dataBaseUrl}}/entity/findById?entityId={{entityId}} {{httpVersion}}
+

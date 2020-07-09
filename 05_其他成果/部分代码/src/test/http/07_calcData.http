@@ -1,0 +1,321 @@
+@hostname = localhost
+@port = 8000
+@host = {{hostname}}:{{port}}
+@dataBaseUrl = http://{{host}}/data
+@baseUrl = http://{{host}}/data/pointData
+@contentTypeJson = Content-Type: application/json
+@httpVersion = HTTP/1.1
+
+@parameterIdA = testParameterIdA
+@parameterIdB = testParameterIdB
+@parameterIdC = testParameterIdC
+@entityId = testEntityId
+@pointIdA = {{entityId}}__{{parameterIdA}}__INSTANT
+@pointIdB = {{entityId}}__{{parameterIdB}}__INSTANT
+@pointIdC = {{entityId}}__{{parameterIdC}}__INSTANT
+
+@firstTime = 2020-01-01 00:00:00
+@firstUrlTime = 20200101000000
+@secondUrlTime = 20200102000000
+
+#
+# 思路：
+# 使用3个点：A，B，C
+# A：计算点，
+# B、C：原始值
+# 
+# 在参数中配置 A = B + C
+# 
+# 在公式中配置 A = B * C
+#
+
+
+# 0. 准备工作
+
+# 0.1 增加参数
+
+# 0.1.1 验证参数
+###
+GET {{dataBaseUrl}}/parameter/findById?parameterId={{parameterIdA}} {{httpVersion}}
+###
+GET {{dataBaseUrl}}/parameter/findById?parameterId={{parameterIdB}} {{httpVersion}}
+###
+GET {{dataBaseUrl}}/parameter/findById?parameterId={{parameterIdC}} {{httpVersion}}
+
+# 0.1.2 增加参数
+###
+POST {{dataBaseUrl}}/parameter/save {{httpVersion}}
+{{contentTypeJson}}
+
+{
+  "dataPrecision": 2,
+  "dataType": "DOUBLE",
+  "expression": "{ {{parameterIdB}} } + { {{parameterIdC}} }",
+  "id": "{{parameterIdA}}",
+  "name": "{{parameterIdA}}",
+  "periods": [
+    "INSTANT"
+  ],
+  "remark": "string",
+  "type": "INSTANT",
+  "unit": "testUnit"
+}
+###
+POST {{dataBaseUrl}}/parameter/save {{httpVersion}}
+{{contentTypeJson}}
+
+{
+  "dataPrecision": 2,
+  "dataType": "DOUBLE",
+  "expression": null,
+  "id": "{{parameterIdB}}",
+  "name": "{{parameterIdB}}",
+  "periods": [
+    "INSTANT"
+  ],
+  "remark": "string",
+  "type": "INSTANT",
+  "unit": "testUnit"
+}
+###
+POST {{dataBaseUrl}}/parameter/save {{httpVersion}}
+{{contentTypeJson}}
+
+{
+  "dataPrecision": 2,
+  "dataType": "DOUBLE",
+  "expression": null,
+  "id": "{{parameterIdC}}",
+  "name": "{{parameterIdC}}",
+  "periods": [
+    "INSTANT"
+  ],
+  "remark": "string",
+  "type": "INSTANT",
+  "unit": "testUnit"
+}
+
+# 0.1.3 验证参数增加成功
+###
+GET {{dataBaseUrl}}/parameter/findById?parameterId={{parameterIdA}} {{httpVersion}}
+###
+GET {{dataBaseUrl}}/parameter/findById?parameterId={{parameterIdB}} {{httpVersion}}
+###
+GET {{dataBaseUrl}}/parameter/findById?parameterId={{parameterIdC}} {{httpVersion}}
+
+# 0.2 增加实体
+
+### 0.2.1 验证实体ID
+GET {{dataBaseUrl}}/entity/findById?entityId={{entityId}} {{httpVersion}}
+
+
+### 0.2.2 增加实体
+POST {{dataBaseUrl}}/entity/save {{httpVersion}}
+{{contentTypeJson}}
+
+{
+  "customerId": "customerId",
+  "id": "{{entityId}}",
+  "name": "{{entityId}}",
+  "remark": "{{entityId}}"
+}
+
+### 0.2.3 验证证实体增加成功
+GET {{dataBaseUrl}}/entity/findById?entityId={{entityId}} {{httpVersion}}
+
+
+# 0.3 创建测试点
+
+# 0.3.1 验证测试点不存在
+###
+GET {{dataBaseUrl}}/point/findById?pointId={{pointIdA}} {{httpVersion}}
+###
+GET {{dataBaseUrl}}/point/findById?pointId={{pointIdB}} {{httpVersion}}
+###
+GET {{dataBaseUrl}}/point/findById?pointId={{pointIdC}} {{httpVersion}}
+
+# 0.3.2 增加测试点
+###
+POST {{dataBaseUrl}}/point/save {{httpVersion}}
+{{contentTypeJson}}
+
+{
+  "name": "test",
+  "entity": {
+    "id": "{{entityId}}"
+  },
+  "parameter": {
+    "id": "{{parameterIdA}}"
+  },
+  "periodType": "INSTANT",
+  "type": "CALC",
+  "dataPrecision": 2,
+  "remark": "string"
+}
+###
+POST {{dataBaseUrl}}/point/save {{httpVersion}}
+{{contentTypeJson}}
+
+{
+  "name": "test",
+  "entity": {
+    "id": "{{entityId}}"
+  },
+  "parameter": {
+    "id": "{{parameterIdB}}"
+  },
+  "periodType": "INSTANT",
+  "type": "RAW",
+  "dataPrecision": 2,
+  "remark": "string"
+}
+###
+POST {{dataBaseUrl}}/point/save {{httpVersion}}
+{{contentTypeJson}}
+
+{
+  "name": "test",
+  "entity": {
+    "id": "{{entityId}}"
+  },
+  "parameter": {
+    "id": "{{parameterIdC}}"
+  },
+  "periodType": "INSTANT",
+  "type": "RAW",
+  "dataPrecision": 2,
+  "remark": "string"
+}
+
+# 0.3.3 验证增加成功
+###
+GET {{dataBaseUrl}}/point/findById?pointId={{pointIdA}} {{httpVersion}}
+###
+GET {{dataBaseUrl}}/point/findById?pointId={{pointIdB}} {{httpVersion}}
+###
+GET {{dataBaseUrl}}/point/findById?pointId={{pointIdC}} {{httpVersion}}
+
+
+### 0.4 验证测试点无公式，结果是参数中配置的公式
+GET {{dataBaseUrl}}/expression/sample/{{pointIdA}}/{{secondUrlTime}} {{httpVersion}}
+
+
+# 1. 写入原始数据
+# 1.1 写入数据
+### 
+POST {{baseUrl}}/write {{httpVersion}}
+{{contentTypeJson}}
+
+{
+  "pointId": "{{pointIdB}}",
+  "quality": 192,
+  "time": "{{firstTime}}",
+  "value": 10.0
+}
+###
+POST {{baseUrl}}/write {{httpVersion}}
+{{contentTypeJson}}
+
+{
+  "pointId": "{{pointIdC}}",
+  "quality": 192,
+  "time": "{{firstTime}}",
+  "value": 20.0
+}
+
+# 1.2 验证原始数据写入成功
+###
+GET {{baseUrl}}/read/{{pointIdB}}/{{firstUrlTime}} {{httpVersion}}
+###
+GET {{baseUrl}}/read/{{pointIdC}}/{{firstUrlTime}} {{httpVersion}}
+
+# 2. 使用参数中带的公式计算
+###
+GET {{baseUrl}}/read/{{pointIdA}}/{{firstUrlTime}} {{httpVersion}}
+
+
+# 3. 使用自定义的公式计算
+
+### 3.1 增加公式
+POST {{dataBaseUrl}}/expression/write {{httpVersion}}
+{{contentTypeJson}}
+
+{
+  "pointId": "{{pointIdA}}",
+  "expression": "{ {{pointIdB}} } * { {{pointIdC}} }",
+  "validFrom": "{{firstTime}}"
+}
+
+### 3.2 验证公式
+GET {{dataBaseUrl}}/expression/sample/{{pointIdA}}/{{firstUrlTime}} {{httpVersion}}
+
+### 3.3 使用自定义公式计算
+GET {{baseUrl}}/read/{{pointIdA}}/{{firstUrlTime}} {{httpVersion}}
+
+
+
+# 9. 删除测试用的数据
+
+
+# 9.1 删除公式
+### 9.1.1 删除
+GET {{dataBaseUrl}}/entityData/deleteData/expression/{{entityId}} {{httpVersion}}
+
+### 9.1.2 验证
+GET {{dataBaseUrl}}/expression/sample/{{pointIdA}}/{{firstUrlTime}} {{httpVersion}}
+
+
+# 9.2 删除数据
+
+### 9.2.1 删除
+GET {{dataBaseUrl}}/entityData/deleteData/valid_data/{{entityId}} {{httpVersion}}
+
+### 9.2.2 验证
+GET {{baseUrl}}/read/{{pointIdB}}/{{firstUrlTime}} {{httpVersion}}
+
+
+# 9.3 删除点
+
+# 9.3.1 删除
+###
+GET {{dataBaseUrl}}/point/delete?pointId={{pointIdA}} {{httpVersion}}
+###
+GET {{dataBaseUrl}}/point/delete?pointId={{pointIdB}} {{httpVersion}}
+###
+GET {{dataBaseUrl}}/point/delete?pointId={{pointIdC}} {{httpVersion}}
+
+# 9.3.2 验证删除成功
+###
+GET {{dataBaseUrl}}/point/findById?pointId={{pointIdA}} {{httpVersion}}
+###
+GET {{dataBaseUrl}}/point/findById?pointId={{pointIdB}} {{httpVersion}}
+###
+GET {{dataBaseUrl}}/point/findById?pointId={{pointIdC}} {{httpVersion}}
+
+# 9.4 删除参数
+# 9.4.1 删除
+###
+GET {{dataBaseUrl}}/parameter/delete?parameterId={{parameterIdA}} {{httpVersion}}
+###
+GET {{dataBaseUrl}}/parameter/delete?parameterId={{parameterIdB}} {{httpVersion}}
+###
+GET {{dataBaseUrl}}/parameter/delete?parameterId={{parameterIdC}} {{httpVersion}}
+
+# 9.4.2 验证删除成功
+###
+GET {{dataBaseUrl}}/parameter/findById?parameterId={{parameterIdA}} {{httpVersion}}
+###
+GET {{dataBaseUrl}}/parameter/findById?parameterId={{parameterIdB}} {{httpVersion}}
+###
+GET {{dataBaseUrl}}/parameter/findById?parameterId={{parameterIdC}} {{httpVersion}}
+
+# 9.5 删除实体
+
+### 9.5.1 删除
+GET {{dataBaseUrl}}/entity/delete?entityId={{entityId}} {{httpVersion}}
+
+
+### 9.5.2 验证删除成功
+GET {{dataBaseUrl}}/entity/findById?entityId={{entityId}} {{httpVersion}}
+
+

@@ -1,0 +1,94 @@
+@hostname = localhost
+@port = 8000
+@host = {{hostname}}:{{port}}
+@baseUrl = http://{{host}}/data/entity
+@contentTypeJson = Content-Type: application/json
+@httpVersion = HTTP/1.1
+
+@entityId = testEntityId
+@customerId = testCustomerId
+
+### 0. 验证测试用的实体ID是否存在（根据ID查询实体）
+GET {{baseUrl}}/findById?entityId={{entityId}} {{httpVersion}}
+
+# 1. 增加实体
+
+### 1.1 增加
+POST {{baseUrl}}/save {{httpVersion}}
+{{contentTypeJson}}
+
+{
+  "customerId": "{{customerId}}",
+  "id": "{{entityId}}",
+  "name": "{{entityId}}",
+  "remark": "{{entityId}}"
+}
+
+### 1.2 验证（根据ID查询实体）
+GET {{baseUrl}}/findById?entityId={{entityId}} {{httpVersion}}
+
+
+# 2. 修改实体
+
+### 2.1 修改
+POST {{baseUrl}}/save {{httpVersion}}
+{{contentTypeJson}}
+
+{
+  "customerId": "{{customerId}}",
+  "id": "{{entityId}}",
+  "name": "entityName",
+  "remark": "entityRemark"
+}
+
+### 2.2 验证（根据ID查询实体）
+GET {{baseUrl}}/findById?entityId={{entityId}} {{httpVersion}}
+
+
+### 3. 实体列表查询
+POST {{baseUrl}}/list {{httpVersion}}
+{{contentTypeJson}}
+
+{
+  "columns": [
+    "id", "name", "customerId", "remark"
+  ],
+  "orderByList": [
+    {
+      "column": "id",
+      "order": "ASC"
+    }
+  ],
+  "pageNo": 1,
+  "pageSize": 10,
+  "searchColumns": [
+    "name"
+  ],
+  "searchText": "name",
+  "whereCondition": [
+    {
+      "column": "id",
+      "operator": "EQ",
+      "values": [
+        "{{entityId}}"
+      ]
+    }
+  ]
+}
+
+
+### 4. 查询所有的customerId
+GET {{baseUrl}}/findAllCustomerIds
+
+### 5. 根据customerId查询实体列表
+GET {{baseUrl}}/findByCustomerId?customerId={{customerId}} {{httpVersion}}
+
+# 6. 删除实体
+
+### 6.1 删除
+GET {{baseUrl}}/delete?entityId={{entityId}} {{httpVersion}}
+
+### 6.2 验证（根据ID查询实体）
+GET {{baseUrl}}/findById?entityId={{entityId}} {{httpVersion}}
+
+

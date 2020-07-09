@@ -1,0 +1,146 @@
+@hostname = localhost
+@port = 8000
+@host = {{hostname}}:{{port}}
+@baseUrl = http://{{host}}/data/parameter
+@contentTypeJson = Content-Type: application/json
+@httpVersion = HTTP/1.1
+
+@parameterId = testParameter
+@tagName = testTag
+
+### 0. 先查一下测试的参数ID是否存在，如果存在，就换一个（根据参数ID查询）
+
+GET {{baseUrl}}/findById?parameterId={{parameterId}} {{httpVersion}}
+
+# 1. 增加参数
+
+### 1.1 增加一个参数
+
+POST {{baseUrl}}/save {{httpVersion}}
+{{contentTypeJson}}
+
+{
+  "dataPrecision": 2,
+  "dataType": "DOUBLE",
+  "expression": "string",
+  "id": "{{parameterId}}",
+  "name": "{{parameterId}}",
+  "periods": [
+    "INSTANT"
+  ],
+  "remark": "string",
+  "tags": [
+    {
+      "name": "{{tagName}}"
+    }
+  ],
+  "type": "INSTANT",
+  "unit": "testUnit"
+}
+
+### 1.2 验证是否增加成功（根据参数ID查询）
+
+GET {{baseUrl}}/findById?parameterId={{parameterId}} {{httpVersion}}
+
+
+# 2. 修改参数
+### 2.1 修改
+POST {{baseUrl}}/save {{httpVersion}}
+{{contentTypeJson}}
+
+{
+  "dataPrecision": 4,
+  "dataType": "BOOLEAN",
+  "expression": "test",
+  "id": "{{parameterId}}",
+  "name": "{{parameterId}}",
+  "periods": [
+    "HOUR", "DAY"
+  ],
+  "remark": "modifyRemark",
+  "tags": [
+    {
+      "name": "{{tagName}}"
+    }
+  ],
+  "type": "PERIOD",
+  "unit": "modifyUnit"
+}
+
+### 2.2 验证是否修改成功（根据参数ID查询）
+
+GET {{baseUrl}}/findById?parameterId={{parameterId}} {{httpVersion}}
+
+
+### 3. 查询参数列表
+POST {{baseUrl}}/list {{httpVersion}}
+{{contentTypeJson}}
+
+{
+  "columns": [
+    "id", "name", "type", "dataType", "tags", "unit", "expression"
+  ],
+  "orderByList": [
+    {
+      "column": "id",
+      "order": "ASC"
+    }
+  ],
+  "pageNo": 1,
+  "pageSize": 10,
+  "searchColumns": [
+    "id", "name"
+  ],
+  "searchText": "{{parameterId}}",
+  "whereCondition": [
+    {
+      "column": "id",
+      "operator": "EQ",
+      "values": [
+        "{{parameterId}}"
+      ]
+    }
+  ]
+}
+
+
+###  4. 参数的标签列表，根据参数ID，查它的标签列表
+GET {{baseUrl}}/tagList?parameterId={{parameterId}} {{httpVersion}}
+
+# 5. 增加标签
+
+### 5.1 增加标签
+GET {{baseUrl}}/addTag?parameterId={{parameterId}}&tagName=newTag {{httpVersion}}
+
+### 5.2 验证增加（根据参数ID，查它的标签列表）
+
+GET {{baseUrl}}/tagList?parameterId={{parameterId}} {{httpVersion}}
+
+
+# 6. 根据标签查找参数
+
+### 6.1 根据创建参数时的标签查询
+GET {{baseUrl}}/findByTag?tagName={{tagName}} {{httpVersion}}
+
+### 6.2 根据新增加的标签查询
+GET {{baseUrl}}/findByTag?tagName=newTag {{httpVersion}}
+
+# 7. 删除标签
+
+### 7.1 删除
+GET {{baseUrl}}/deleteTag?parameterId={{parameterId}}&tagName=newTag
+
+### 7.2 验证（根据参数ID，查它的标签列表）
+
+GET {{baseUrl}}/tagList?parameterId={{parameterId}} {{httpVersion}}
+
+
+# 8. 删除参数
+
+### 8.1 删除
+GET {{baseUrl}}/delete?parameterId={{parameterId}} {{httpVersion}}
+
+### 8.2 验证（根据参数ID查询）
+
+GET {{baseUrl}}/findById?parameterId={{parameterId}} {{httpVersion}}
+

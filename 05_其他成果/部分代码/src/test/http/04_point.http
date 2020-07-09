@@ -1,0 +1,164 @@
+@hostname = localhost
+@port = 8000
+@host = {{hostname}}:{{port}}
+@dataBaseUrl = http://{{host}}/data
+@baseUrl = http://{{host}}/data/point
+@contentTypeJson = Content-Type: application/json
+@httpVersion = HTTP/1.1
+
+@parameterId = testParameterId
+@entityId = testEntityId
+@pointId = {{entityId}}__{{parameterId}}__INSTANT
+
+
+# 0. 验证参数ID、质量码ID、实体ID 和 点的ID是否存在，并创建测试用的 参数、质量码、实体
+### 0.1.1 验证参数
+GET {{dataBaseUrl}}/parameter/findById?parameterId={{parameterId}} {{httpVersion}}
+
+### 0.1.2 增加参数
+POST {{dataBaseUrl}}/parameter/save {{httpVersion}}
+{{contentTypeJson}}
+
+{
+  "dataPrecision": 2,
+  "dataType": "DOUBLE",
+  "expression": "string",
+  "id": "{{parameterId}}",
+  "name": "{{parameterId}}",
+  "periods": [
+    "INSTANT"
+  ],
+  "remark": "string",
+  "type": "INSTANT",
+  "unit": "testUnit"
+}
+
+### 0.1.3 验证参数增加成功
+GET {{dataBaseUrl}}/parameter/findById?parameterId={{parameterId}} {{httpVersion}}
+
+
+### 0.2.1 验证实体ID
+GET {{dataBaseUrl}}/entity/findById?entityId={{entityId}} {{httpVersion}}
+
+
+### 0.2.2 增加实体
+POST {{dataBaseUrl}}/entity/save {{httpVersion}}
+{{contentTypeJson}}
+
+{
+  "customerId": "customerId",
+  "id": "{{entityId}}",
+  "name": "{{entityId}}",
+  "remark": "{{entityId}}"
+}
+
+### 0.2.3 验证证实体增加成功
+GET {{dataBaseUrl}}/entity/findById?entityId={{entityId}} {{httpVersion}}
+
+### 0.3 验证点不存在
+GET {{baseUrl}}/findById?pointId={{pointId}} {{httpVersion}}
+
+# 1. 增加点
+### 1.1 增加
+POST {{baseUrl}}/save {{httpVersion}}
+{{contentTypeJson}}
+
+{
+  "name": "test",
+  "entity": {
+    "id": "{{entityId}}"
+  },
+  "parameter": {
+    "id": "{{parameterId}}"
+  },
+  "periodType": "INSTANT",
+  "type": "RAW",
+  "dataPrecision": 2,
+  "remark": "string"
+}
+
+### 1.2 验证（根据ID查询点）
+GET {{baseUrl}}/findById?pointId={{pointId}} {{httpVersion}}
+
+# 2. 修改点
+### 2.1 修改
+POST {{baseUrl}}/save {{httpVersion}}
+{{contentTypeJson}}
+
+{
+  "id": "{{pointId}}",
+  "name": "testName",
+  "entity": {
+    "id": "{{entityId}}"
+  },
+  "parameter": {
+    "id": "{{parameterId}}"
+  },
+  "periodType": "INSTANT",
+  "type": "RAW",
+  "dataPrecision": 4,
+  "remark": "testRemark"
+}
+### 2.2 验证（根据ID查询点）
+GET {{baseUrl}}/findById?pointId={{pointId}} {{httpVersion}}
+
+
+### 3. 查询点的列表
+POST {{baseUrl}}/list {{httpVersion}}
+{{contentTypeJson}}
+
+{
+  "columns": [
+    "id", "name", "entity", "parameter", "periodType", "type", "dataPrecision", "remark"
+  ],
+  "orderByList": [
+    {
+      "column": "id",
+      "order": "ASC"
+    }
+  ],
+  "pageNo": 1,
+  "pageSize": 10,
+  "searchColumns": [
+    "name"
+  ],
+  "searchText": "name",
+  "whereCondition": [
+    {
+      "column": "id",
+      "operator": "EQ",
+      "values": [
+        "{{pointId}}"
+      ]
+    }
+  ]
+}
+
+
+### 4. 查某一实体下的所有点
+GET {{baseUrl}}/findByEntityId?entityId={{entityId}} {{httpVersion}}
+
+# 5. 删除
+### 5.1 删除
+GET {{baseUrl}}/delete?pointId={{pointId}} {{httpVersion}}
+
+### 5.2 验证（根据ID查询点）
+GET {{baseUrl}}/findById?pointId={{pointId}} {{httpVersion}}
+
+# 9. 删除测试用的数据
+
+# 9.1 删除参数
+### 9.1.1 删除
+GET {{dataBaseUrl}}/parameter/delete?parameterId={{parameterId}} {{httpVersion}}
+
+### 9.1.2 验证删除成功
+GET {{dataBaseUrl}}/parameter/findById?parameterId={{parameterId}} {{httpVersion}}
+
+# 9.2 删除实体
+
+### 9.2.1 删除
+GET {{dataBaseUrl}}/entity/delete?entityId={{entityId}} {{httpVersion}}
+
+
+### 9.2.2 验证删除成功
+GET {{dataBaseUrl}}/entity/findById?entityId={{entityId}} {{httpVersion}}

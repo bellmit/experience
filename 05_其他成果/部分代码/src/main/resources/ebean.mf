@@ -1,0 +1,3 @@
+entity-packages: data.domain
+transactional-packages: data.domain
+querybean-packages: data.domain
